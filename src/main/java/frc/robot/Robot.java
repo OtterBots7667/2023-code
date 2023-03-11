@@ -35,11 +35,11 @@ public class Robot extends TimedRobot {
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
-  private MotorControllerGroup rightDrives = new MotorControllerGroup( new WPI_VictorSPX(), new WPI_VictorSPX());
-  private MotorControllerGroup leftDrives = new MotorControllerGroup( new WPI_VictorSPX(), new WPI_VictorSPX());
-  private TalonFX pivot = new motorController(new TalonFX());                                     //Replace Victors with the
-  private VictorSPX FAslide = new motorController(new VictorSPX()); //FAslide = Fore-Aft Slide    //correct motor controllers
-  private VictorSPX armExtension = new motorController(new VictorSPX());                          //
+  // private MotorControllerGroup rightDrives = new MotorControllerGroup( new WPI_VictorSPX(), new WPI_VictorSPX());
+  // private MotorControllerGroup leftDrives = new MotorControllerGroup( new WPI_VictorSPX(), new WPI_VictorSPX());
+  // private TalonFX pivot = new motorController(new TalonFX());                                     //Replace Victors with the
+  // private VictorSPX FAslide = new motorController(new VictorSPX()); //FAslide = Fore-Aft Slide    //correct motor controllers
+  // private VictorSPX armExtension = new motorController(new VictorSPX());                          //
 
   private DoubleSolenoid brake = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 1, 2);
   private DoubleSolenoid leftGrabber = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 1, 2);
@@ -178,14 +178,14 @@ if(rightStick > -0.05 && rightStick < 0.05){
   rightStick = 0.0;
 }
 
-  leftDrives.set(leftStick);
+  // leftDrives.set(leftStick);
   
-  // if you press A, all wheels are controled by left stick (makes sure that you drive straight)
-  if(joystickDriver.getRawButton(4) || joystickDriver.getRawButton(1)){
-    rightDrives.set(-leftStick);
-  }else{
-  rightDrives.set(rightStick);
-  }
+  // // if you press A, all wheels are controled by left stick (makes sure that you drive straight)
+  // if(joystickDriver.getRawButton(4) || joystickDriver.getRawButton(1)){
+  //   rightDrives.set(-leftStick);
+  // }else{
+  // rightDrives.set(rightStick);
+  // }
 
   
   //Grabber Code (っ◕‿◕)っ ❒  ⃤
@@ -247,145 +247,101 @@ if(posHighButton) {
 //   goingPickUp = true;
 // }
 
-pivotPos = pivot.getSelectedSensorPosition;
-armExtensionPos = armExtension.getSelectedSensorPosition;
-FAslidePos = FAslide.getSelectedSensorPosition;
+// pivotPos = pivot.getSelectedSensorPosition;
+// armExtensionPos = armExtension.getSelectedSensorPosition;
+// FAslidePos = FAslide.getSelectedSensorPosition;
 
-if(goingGround){
-  goingMid = false;
-  goingHigh = false;
-  // goingPickUp = false;
-  if(pivotPos<){
-    pivotGood = false;
-    pivot.set(controlMode.PercentOutput, 0.5);
-  }else if(pivotPos>){
-    pivotGood = false;
-    pivot.set(controlMode.PercentOutput, -0.5);
-  }else{
-    pivot.set(controlMode.PercentOutput, 0);
-    pivotGood = true;
-  }
-
-  if(armExtensionPos<){
-    armExtensionGood = false;
-    armExtension.set(controlMode.PercentOutput, 0.5);
-  }else if(pivotPos>){
-    armExtensionGood = false;
-    armExtension.set(controlMode.PercentOutput, -0.5);
-  }else{
-    armExtension.set(controlMode.PercentOutput, 0);
-    armExtensionGood = true;
-  }
-
-  if(FAslideGood<){
-    FAslideGood = false;
-    FAslide.set(controlMode.PercentOutput, 0.5);
-  }else if(pivotPos>){
-    FAslideGood = false;
-    FAslide.set(controlMode.PercentOutput, -0.5);
-  }else{
-    FAslide.set(controlMode.PercentOutput, 0);
-    FAslideGood = true;
-  }
-  if(pivotGood && armExtensionGood && FAslideGood){
-pivotGood = false;
-armExtensionGood = false;
-FAslideGood = false;
-goingGround = false;
-  }
-} 
-if(goingMid){
-  goingGround = false;
-  goingHigh = false;
-  // goingPickUp = false;
-  if(pivotPos<){
-    pivotGood = false;
-    pivot.set(controlMode.PercentOutput, 0.5);
-  }else if(pivotPos>){
-    pivotGood = false;
-    pivot.set(controlMode.PercentOutput, -0.5);
-  }else{
-    pivot.set(controlMode.PercentOutput, 0);
-    pivotGood = true;
-  }
-
-  if(armExtensionPos<){
-    armExtensionGood = false;
-    armExtension.set(controlMode.PercentOutput, 0.5);
-  }else if(pivotPos>){
-    armExtensionGood = false;
-    armExtension.set(controlMode.PercentOutput, -0.5);
-  }else{
-    armExtension.set(controlMode.PercentOutput, 0);
-    armExtensionGood = true;
-  }
-
-  if(FAslide<){
-    FAslideGood = false;
-    FAslide.set(controlMode.PercentOutput, 0.5);
-  }else if(pivotPos>){
-    FAslideGood = false;
-    FAslide.set(controlMode.PercentOutput, -0.5);
-  }else{
-    FAslide.set(controlMode.PercentOutput, 0);
-    FAslideGood = true;
-  }
-  if(pivotGood && armExtensionGood && FAslideGood){
-pivotGood = false;
-armExtensionGood = false;
-FAslideGood = false;
-goingMid = false;
-  }
-} 
-
-if(goingHigh){
-  goingGround = false;
-  goingMid = false;
-  // goingPickUp = false;
-  if(pivotPos<){
-    pivotGood = false;
-    pivot.set(controlMode.PercentOutput, 0.5);
-  }else if(pivotPos>){
-    pivotGood = false;
-    pivot.set(controlMode.PercentOutput, -0.5);
-  }else{
-    pivot.set(controlMode.PercentOutput, 0);
-    pivotGood = true;
-  }
-
-  if(armExtensionPos<){
-    armExtensionGood = false;
-    armExtension.set(controlMode.PercentOutput, 0.5);
-  }else if(pivotPos>){
-    armExtensionGood = false;
-    armExtension.set(controlMode.PercentOutput, -0.5);
-  }else{
-    armExtension.set(controlMode.PercentOutput, 0);
-    armExtensionGood = true;
-  }
-
-  if(FAslidePos<){
-    FAslideGood = false;
-    FAslide.set(controlMode.PercentOutput, 0.5);
-  }else if(pivotPos>){
-    FAslideGood = false;
-    FAslide.set(controlMode.PercentOutput, -0.5);
-  }else{
-    FAslide.set(controlMode.PercentOutput, 0);
-    FAslideGood = true;
-  }
-  if(pivotGood && armExtensionGood && FAslideGood){
-pivotGood = false;
-armExtensionGood = false;
-FAslideGood = false;
-goingHigh = false;
-  }
-} 
-
-// if(goingPickUp){
-//   goingGround = false;
+// if(goingGround){
 //   goingMid = false;
 //   goingHigh = false;
+//   // goingPickUp = false;
+//   if(pivotPos<){
+//     pivotGood = false;
+//     pivot.set(controlMode.PercentOutput, 0.5);
+//   }else if(pivotPos>){
+//     pivotGood = false;
+//     pivot.set(controlMode.PercentOutput, -0.5);
+//   }else{
+//     pivot.set(controlMode.PercentOutput, 0);
+//     pivotGood = true;
+//   }
+
+//   if(armExtensionPos<){
+//     armExtensionGood = false;
+//     armExtension.set(controlMode.PercentOutput, 0.5);
+//   }else if(pivotPos>){
+//     armExtensionGood = false;
+//     armExtension.set(controlMode.PercentOutput, -0.5);
+//   }else{
+//     armExtension.set(controlMode.PercentOutput, 0);
+//     armExtensionGood = true;
+//   }
+
+//   if(FAslideGood<){
+//     FAslideGood = false;
+//     FAslide.set(controlMode.PercentOutput, 0.5);
+//   }else if(pivotPos>){
+//     FAslideGood = false;
+//     FAslide.set(controlMode.PercentOutput, -0.5);
+//   }else{
+//     FAslide.set(controlMode.PercentOutput, 0);
+//     FAslideGood = true;
+//   }
+//   if(pivotGood && armExtensionGood && FAslideGood){
+// pivotGood = false;
+// armExtensionGood = false;
+// FAslideGood = false;
+// goingGround = false;
+//   }
+// } 
+// if(goingMid){
+//   goingGround = false;
+//   goingHigh = false;
+//   // goingPickUp = false;
+//   if(pivotPos<){
+//     pivotGood = false;
+//     pivot.set(controlMode.PercentOutput, 0.5);
+//   }else if(pivotPos>){
+//     pivotGood = false;
+//     pivot.set(controlMode.PercentOutput, -0.5);
+//   }else{
+//     pivot.set(controlMode.PercentOutput, 0);
+//     pivotGood = true;
+//   }
+
+//   if(armExtensionPos<){
+//     armExtensionGood = false;
+//     armExtension.set(controlMode.PercentOutput, 0.5);
+//   }else if(pivotPos>){
+//     armExtensionGood = false;
+//     armExtension.set(controlMode.PercentOutput, -0.5);
+//   }else{
+//     armExtension.set(controlMode.PercentOutput, 0);
+//     armExtensionGood = true;
+//   }
+
+//   if(FAslide<){
+//     FAslideGood = false;
+//     FAslide.set(controlMode.PercentOutput, 0.5);
+//   }else if(pivotPos>){
+//     FAslideGood = false;
+//     FAslide.set(controlMode.PercentOutput, -0.5);
+//   }else{
+//     FAslide.set(controlMode.PercentOutput, 0);
+//     FAslideGood = true;
+//   }
+//   if(pivotGood && armExtensionGood && FAslideGood){
+// pivotGood = false;
+// armExtensionGood = false;
+// FAslideGood = false;
+// goingMid = false;
+//   }
+// } 
+
+// if(goingHigh){
+//   goingGround = false;
+//   goingMid = false;
+//   // goingPickUp = false;
 //   if(pivotPos<){
 //     pivotGood = false;
 //     pivot.set(controlMode.PercentOutput, 0.5);
@@ -422,9 +378,10 @@ goingHigh = false;
 // pivotGood = false;
 // armExtensionGood = false;
 // FAslideGood = false;
-// goingPickUp = false;
+// goingHigh = false;
 //   }
-// }
+// } 
+
 
 teleopCounter++;
 
