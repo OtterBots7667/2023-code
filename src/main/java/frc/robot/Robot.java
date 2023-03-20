@@ -112,6 +112,7 @@ Double blueness = 0.0;
 Double greenness = 0.0;
 String posColor = null;
 Boolean auto = false;
+Boolean noTarget = true;
 
 //degreeConstant multiplied by degrees can be used in place of TalonFX tics
 
@@ -120,7 +121,7 @@ Double p = 0.00002;
 Double i = 0.00002;
 Double d = 0.000001;
 // Double f = 0.08;
-Double target = -20500.0;
+Double target = 0.0;
 Double armPos = 0.0;
 Double pidConstant = 81920.0/360.0;
 Double time = 0.0;
@@ -152,13 +153,15 @@ Double pid = pidf.calculate(armPos, target);
 // Double ff = Math.cos(Math.toRadians(target / pidConstant)) * f;
 // Double power = pid + ff;
 
-if(pid>0.5){
-  pid = 0.5;
-}else if(pid < -0.5){
-  pid = -0.5;
+if(pid>0.25){
+  pid = 0.25;
+}else if(pid < -0.25){
+  pid = -0.25;
 }
-if(goHigh||goMid||goShelf||auto){
+if(!noTarget){
 pivot.set(TalonFXControlMode.PercentOutput, pid);
+}else{
+  target = 0.0;
 }
 System.out.println(pid);
 SmartDashboard.putNumber("PID target", target);
@@ -306,34 +309,44 @@ grabber.set(kForward);
 }
 
 if(posRestButton){
+noTarget = true;
 highPosBypass = false;
+shelfPosBypass = false;
 goRest = true;
 goShelf = false;
 goHigh = false;
 goMid = false;
 goGround = false;
 }else if(posShelfButton){
+  noTarget = false;
   highPosBypass = false;
-  goRest = false;
+ shelfPosBypass = false;
+ goRest = false;
   goShelf = true;
   goHigh = false;
   goMid = false;
   goGround = false;
 }else if(posHighButton){
+  noTarget = false;
+  shelfPosBypass = false;
   goRest = false;
   goShelf = false;
   goHigh = true;
   goMid = false;
   goGround = false;
 }else if(posMidButton){
+  noTarget = false;
   highPosBypass = false;
+  shelfPosBypass = false;
   goRest = false;
   goShelf = false;
   goHigh = false;
   goMid = true;
   goGround = false;
 }else if(posGroundButton){
+  noTarget = true;
   highPosBypass = false;
+  shelfPosBypass = false;
   goRest = false;
   goShelf = false;
   goHigh = false;
@@ -388,18 +401,14 @@ if(goShelf){
           if(!shelfPosBypass){
           FASlide.set(0.0);
           }
-          if(pivot.getSelectedSensorPosition()<-5000){          
-          pivot.set(TalonFXControlMode.PercentOutput, 0.075);
+          target =-12500.0;
           shelfPosBypass = true;
           if(posColor != "green"){
             armExtension.set(VictorSPXControlMode.PercentOutput, 0.3);
           }else{
-            armExtension.set(VictorSPXControlMode.PercentOutput, 0.07);
-            pivot.set(TalonFXControlMode.PercentOutput, 0.10);
+            armExtension.set(VictorSPXControlMode.PercentOutput, 0.0);
           }
-        }else{
-          pivot.set(TalonFXControlMode.PercentOutput, -0.1);
-        }
+
         }else{
           FASlide.set(0.25);
 
@@ -416,11 +425,11 @@ if(goGround){System.out.println("Ground");
         if(FAEncoder.getPosition()>-0.5){
           FASlide.set(0.0);
           if(joystickButtons.getRawAxis(1) == 0){
-          pivot.set(TalonFXControlMode.PercentOutput, -0.28);
+          pivot.set(TalonFXControlMode.PercentOutput, -0.24);
           }else if(joystickButtons.getRawAxis(1) > 0){
-            pivot.set(TalonFXControlMode.PercentOutput, -0.25);
+            pivot.set(TalonFXControlMode.PercentOutput, -0.21);
           }else  {
-            pivot.set(TalonFXControlMode.PercentOutput, -0.31);
+            pivot.set(TalonFXControlMode.PercentOutput, -0.27);
           }
         }else{
           FASlide.set(0.25);
@@ -430,38 +439,17 @@ if(goGround){System.out.println("Ground");
 
 
 if(goMid){
-  if(posColor != "blue"&&!midPosBypass){
+  if(posColor != "blue"){
     armExtension.set(VictorSPXControlMode.PercentOutput, -0.3);
+    System.out.println("OOOOOOOOOOOOOOOOOOOOOOOO");
       }else{
-        if(!highPosBypass){
         armExtension.set(VictorSPXControlMode.PercentOutput, 0);
-        }
-        if(FAEncoder.getPosition()>-1||midPosBypass){
-          if(!midPosBypass){
-          FASlide.set(0.0);
-          }
-          if(pivot.getSelectedSensorPosition()<-5000){          
-          midPosBypass = true;
-          if(joystickButtons.getRawAxis(1) == 0){
-            pivot.set(TalonFXControlMode.PercentOutput, 0.08);
-          }else if(joystickButtons.getRawAxis(1)> 0){
-            pivot.set(TalonFXControlMode.PercentOutput, .1);
-          }else{
-            pivot.set(TalonFXControlMode.PercentOutput,0.06);
-          }
+           target = -12000.0;
             if(FAEncoder.getPosition()<-32.5){
               FASlide.set(0.0);
             }else{
               FASlide.set(-0.25);
-            }
-          
-        }else{
-          pivot.set(TalonFXControlMode.PercentOutput, -0.1);
-        }
-        }else{
-          FASlide.set(0.25);
-
-        }
+            } 
       }
 }
 
@@ -472,37 +460,18 @@ if(goHigh){
         if(!highPosBypass){
         armExtension.set(VictorSPXControlMode.PercentOutput, 0);
         }
-        if(FAEncoder.getPosition()>-1||highPosBypass){
-          if(!highPosBypass){
+        target = -13000.0;
+        if(FAEncoder.getPosition()<-32.5){
           FASlide.set(0.0);
-          }
-          if(pivot.getSelectedSensorPosition()<-2500){          
-          pivot.set(TalonFXControlMode.PercentOutput, 0.075);
+        }else{
+          FASlide.set(-0.25);
+        }
           highPosBypass = true;
           if(posColor != "red"){
             armExtension.set(VictorSPXControlMode.PercentOutput, 0.3);
           }else{
             armExtension.set(VictorSPXControlMode.PercentOutput, 0);
-            if(joystickButtons.getRawAxis(1) == 0){
-            pivot.set(TalonFXControlMode.PercentOutput, 0.19);
-            }else if(joystickButtons.getRawAxis(1)> 0){
-              pivot.set(TalonFXControlMode.PercentOutput, 0.22);
-            }else{
-              pivot.set(TalonFXControlMode.PercentOutput, 0.16);
-            }
-            if(FAEncoder.getPosition()<-32.5){
-              FASlide.set(0.0);
-            }else{
-              FASlide.set(-0.25);
-            }
           }
-        }else{
-          pivot.set(TalonFXControlMode.PercentOutput, -0.1);
-        }
-        }else{
-          FASlide.set(0.25);
-
-        }
       }
 
   //make sure arm is retracted
@@ -526,9 +495,7 @@ teleopCounter++;
 
   /** This function is called once when the robot is disabled. */
   @Override
-  public void disabledInit(
-  
-  ) {}
+  public void disabledInit() {}
 
   /** This function is called periodically when disabled. */
   @Override
