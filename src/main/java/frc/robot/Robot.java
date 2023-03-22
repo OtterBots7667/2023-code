@@ -54,7 +54,7 @@ import edu.wpi.first.math.controller.PIDController;
  */
 public class Robot extends TimedRobot {
   private static final String kDefaultAuto = "Default";
-  private static final String kCustomAuto = "My Auto";
+  private static final String kCustomAuto = "NO AUTO";
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
@@ -124,7 +124,7 @@ Boolean manualTT1 = false;  // manual target timer variables
 Double manualTT2 = 0.0;
 Double manualTT3 = 0.0;
 
-Double p = 0.00002;
+Double p = 0.00001;
 Double i = 0.00002;
 Double d = 0.000001;
 // Double f = 0.08;
@@ -132,16 +132,18 @@ Double target = 0.0;
 Double armPos = 0.0;
 Double pidConstant = 81920.0/360.0;
 Double time = 0.0;
-
+Double pidPowerLimitUp = 0.16;
+Double pidPowerLimitDown = 0.16;
 int autoTime = 0;
-
+Boolean highPowerHighPos = false;
+Boolean stopPowerGoingDown = false;
   @Override
   public void robotInit() {
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
-    m_chooser.addOption("My Auto", kCustomAuto);
+    m_chooser.addOption("NO AUTO", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
-    // FAEncoder.setPosition(0.0);
-    // pivot.setSelectedSensorPosition(0.0);
+    FAEncoder.setPosition(0.0);
+    pivot.setSelectedSensorPosition(0.0);
   }
 
   /**
@@ -159,10 +161,21 @@ pidf.setPID(p, i, d);
 armPos = (pivot.getSelectedSensorPosition());
 Double pid = pidf.calculate(armPos, target);
 
-if(pid>0.28){
-  pid = 0.28;
-}else if(pid < -0.28){
-  pid = -0.28;
+if(highPowerHighPos){
+  pidPowerLimitUp = 0.32;
+  pidPowerLimitDown = 0.16;
+}else if(stopPowerGoingDown){
+pidPowerLimitDown = 0.0;
+pidPowerLimitUp = 0.16;
+}else{
+  pidPowerLimitUp = 0.16;
+  pidPowerLimitDown = 0.16;
+}
+
+if(pid > pidPowerLimitUp){
+  pid = pidPowerLimitUp;
+}else if(pid < -pidPowerLimitDown){
+  pid = -pidPowerLimitDown;
 }
 if(!noTarget){        //In rest position, PID position updating is disabled
 pivot.set(TalonFXControlMode.PercentOutput, pid);
@@ -170,15 +183,19 @@ pivot.set(TalonFXControlMode.PercentOutput, pid);
   target = 0.0;
 }
 
+
 System.out.println(pid); //prints power that PID is setting pivot to, max is 28%, min is -28%
 SmartDashboard.putNumber("PID target", target);
 SmartDashboard.putNumber("Arm Position", armPos);
 
 
+
+
+
 //Arm extension uses a color sensor to sense the extender's position
     Color detectedColor = colorSensor.getColor();
 
-    redness = detectedColor.red*1.2;    // Red and Blue are given an extra push
+    redness = detectedColor.red*1.3;    // Red and Blue are given an extra push
     blueness = detectedColor.blue*1.1;  // because the sensor is more sensitive to green
     greenness = detectedColor.green;
     
@@ -224,7 +241,7 @@ posColor = "gray";
  manualExtensionButton = joystickManual.getRawButton(3);
  manualPivotButton = joystickManual.getRawButton(4);
 
- 
+
 SmartDashboard.updateValues();
 
  time++;
@@ -397,6 +414,11 @@ if(!manualPivotButton){
   manualTT1 = true;
 }
 
+
+if(!goHigh){
+  highPowerHighPos = false;
+}
+
 // Manual override can be used if the robot behaves unexpectedly, if any of the sensors/encoders
 // aren't working, or if the robot needs to do something beyond its usual functions.
 
@@ -405,25 +427,27 @@ if(goManual){
     armExtension.set(VictorSPXControlMode.PercentOutput, manualStick);
     FASlide.set(0.0);
   }else if(manualFASlideButton){
-    FASlide.set(manualStick);
+    FASlide.set(manualStick*0.4);
     armExtension.set(VictorSPXControlMode.PercentOutput, 0.0);
   }else if(manualPivotButton){
-    if(manualTT1){
-     manualTT2 = manualTimer;
-     manualTT1 = false; 
-    }
-
-    manualTT3 = manualTimer - manualTT2;
 
 
-    target = target + manualTT3;
+if(manualStick > 0.5){
+    manualTimer = 120.0;
+}else if(manualStick < -0.5){
+manualTimer = -120.0;
+}else{
+  manualTimer = 0.0;
+}
+
+    target = target + manualTimer;
+
     armExtension.set(VictorSPXControlMode.PercentOutput, 0.0);
     FASlide.set(0.0);
   }else{
     armExtension.set(VictorSPXControlMode.PercentOutput, 0.0);
     FASlide.set(0.0);
   }
-  manualTimer += 120;
 }
 
 
@@ -434,7 +458,11 @@ if(goRest){
         armExtension.set(VictorSPXControlMode.PercentOutput, 0);
         if(FAEncoder.getPosition()>-0.5){
           FASlide.set(0.0);
-          pivot.set(TalonFXControlMode.PercentOutput, 0.12);
+          if(pivot.getSelectedSensorPosition() < -500.0){
+          pivot.set(TalonFXControlMode.PercentOutput, 0.20);
+          }else{
+            pivot.set(TalonFXControlMode.PercentOutput, 0.1);
+          }
           if((restCount + 6)%6 == 0){
           restVar2 = restCount;
           restVar1 = pivot.getSelectedSensorPosition();
@@ -462,7 +490,7 @@ if(goShelf){
           target =-12500.0;
           shelfPosBypass = true;
           if(posColor != "green"){
-            armExtension.set(VictorSPXControlMode.PercentOutput, 0.4);
+            armExtension.set(VictorSPXControlMode.PercentOutput, 0.45);
           }else{
             armExtension.set(VictorSPXControlMode.PercentOutput, 0.0);
           }
@@ -482,7 +510,7 @@ if(goGround){System.out.println("Ground");
         armExtension.set(VictorSPXControlMode.PercentOutput, 0);
         if(FAEncoder.getPosition()>-0.5){
           FASlide.set(0.0);
-          target = -24000.0;
+          target = -27000.0;
         }else{
           FASlide.set(0.25);
         }
@@ -513,19 +541,25 @@ if(goHigh){
         armExtension.set(VictorSPXControlMode.PercentOutput, 0);
         }
         target = -12300.0;
+        stopPowerGoingDown = true;
         if(FAEncoder.getPosition()<-32.5){
           FASlide.set(0.0);
         }else{
           FASlide.set(-0.25);
         }
           highPosBypass = true;
-          if(posColor != "red"){
-            armExtension.set(VictorSPXControlMode.PercentOutput, 0.4);
+          if(posColor != "red" && (pivot.getSelectedSensorPosition() > -14000 && pivot.getSelectedSensorPosition() < -11000)){
+            highPowerHighPos = true;
+            armExtension.set(VictorSPXControlMode.PercentOutput, 0.3);
           }else{
             armExtension.set(VictorSPXControlMode.PercentOutput, 0);
+           if(pivot.getSelectedSensorPosition() > -14000 && pivot.getSelectedSensorPosition() < -11000){
+            highPowerHighPos = true;
+           }else{
+            highPowerHighPos = false;
+           }
           }
       }
-
   //make sure arm is retracted
   //make sure FASlide is all the way back
   //set pivot angle
@@ -533,10 +567,12 @@ if(goHigh){
   //set FASlide
 }
 
-if(joystickButtons.getRawButton(4)&&joystickButtons.getRawAxis(1)<-0.5){
+if(joystickButtons.getRawButton(2) && joystickButtons.getRawAxis(1)<-0.5){
 brake.set(kForward);
-}else if(joystickButtons.getRawButton(4)&&joystickButtons.getRawAxis(1)>0.5){
+System.out.println("YASSS ED");
+}else if(joystickButtons.getRawButton(2) && joystickButtons.getRawAxis(1)>0.5){
   brake.set(kReverse);
+  System.out.println("NO ED");
 }
 
 
