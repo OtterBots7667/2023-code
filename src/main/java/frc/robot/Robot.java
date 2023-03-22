@@ -161,15 +161,12 @@ pidf.setPID(p, i, d);
 armPos = (pivot.getSelectedSensorPosition());
 Double pid = pidf.calculate(armPos, target);
 
-if(highPowerHighPos){
-  pidPowerLimitUp = 0.32;
+if(!goHigh){
   pidPowerLimitDown = 0.16;
-}else if(stopPowerGoingDown){
-pidPowerLimitDown = 0.0;
-pidPowerLimitUp = 0.16;
-}else{
   pidPowerLimitUp = 0.16;
-  pidPowerLimitDown = 0.16;
+}else{
+  pidPowerLimitDown = 0.05;
+  pidPowerLimitUp = 0.32;
 }
 
 if(pid > pidPowerLimitUp){
@@ -414,11 +411,6 @@ if(!manualPivotButton){
   manualTT1 = true;
 }
 
-
-if(!goHigh){
-  highPowerHighPos = false;
-}
-
 // Manual override can be used if the robot behaves unexpectedly, if any of the sensors/encoders
 // aren't working, or if the robot needs to do something beyond its usual functions.
 
@@ -541,23 +533,18 @@ if(goHigh){
         armExtension.set(VictorSPXControlMode.PercentOutput, 0);
         }
         target = -12300.0;
-        stopPowerGoingDown = true;
         if(FAEncoder.getPosition()<-32.5){
           FASlide.set(0.0);
         }else{
           FASlide.set(-0.25);
         }
           highPosBypass = true;
-          if(posColor != "red" && (pivot.getSelectedSensorPosition() > -14000 && pivot.getSelectedSensorPosition() < -11000)){
-            highPowerHighPos = true;
+          if(posColor != "red"){
+            if(pivot.getSelectedSensorPosition() > -14000 && pivot.getSelectedSensorPosition() < -11000){
             armExtension.set(VictorSPXControlMode.PercentOutput, 0.3);
+            }
           }else{
             armExtension.set(VictorSPXControlMode.PercentOutput, 0);
-           if(pivot.getSelectedSensorPosition() > -14000 && pivot.getSelectedSensorPosition() < -11000){
-            highPowerHighPos = true;
-           }else{
-            highPowerHighPos = false;
-           }
           }
       }
   //make sure arm is retracted
