@@ -96,12 +96,18 @@ Boolean posShelfButton = false;
 Boolean posRestButton = false;
 Boolean grabberButton = false;
 Boolean releaseButton = false;
+Boolean manualButton = false;
+Double  manualStick = 0.0;
+Boolean manualFASlideButton = false;
+Boolean manualExtensionButton = false;
+Boolean manualPivotButton = false;
 
 Boolean goGround = false;
 Boolean goMid = false;
 Boolean goHigh = false;
 Boolean goShelf = false;
 Boolean goRest = false;
+Boolean goManual = false;
 
 Boolean highPosBypass = false;
 Boolean midPosBypass = false;
@@ -113,9 +119,10 @@ Double greenness = 0.0;
 String posColor = null;
 Boolean auto = false;
 Boolean noTarget = true;
-
-//degreeConstant multiplied by degrees can be used in place of TalonFX tics
-
+Double manualTimer = 0.0;
+Boolean manualTT1 = false;  // manual target timer variables
+Double manualTT2 = 0.0;
+Double manualTT3 = 0.0;
 
 Double p = 0.00002;
 Double i = 0.00002;
@@ -147,31 +154,32 @@ int autoTime = 0;
   @Override
   public void robotPeriodic() {
 
+    //PID using WPILIB PID method
 pidf.setPID(p, i, d);
 armPos = (pivot.getSelectedSensorPosition());
 Double pid = pidf.calculate(armPos, target);
-// Double ff = Math.cos(Math.toRadians(target / pidConstant)) * f;
-// Double power = pid + ff;
 
-if(pid>0.25){
-  pid = 0.25;
-}else if(pid < -0.25){
-  pid = -0.25;
+if(pid>0.28){
+  pid = 0.28;
+}else if(pid < -0.28){
+  pid = -0.28;
 }
-if(!noTarget){
+if(!noTarget){        //In rest position, PID position updating is disabled
 pivot.set(TalonFXControlMode.PercentOutput, pid);
 }else{
   target = 0.0;
 }
-System.out.println(pid);
+
+System.out.println(pid); //prints power that PID is setting pivot to, max is 28%, min is -28%
 SmartDashboard.putNumber("PID target", target);
 SmartDashboard.putNumber("Arm Position", armPos);
 
 
+//Arm extension uses a color sensor to sense the extender's position
     Color detectedColor = colorSensor.getColor();
 
-    redness = detectedColor.red*1.2;
-    blueness = detectedColor.blue;
+    redness = detectedColor.red*1.2;    // Red and Blue are given an extra push
+    blueness = detectedColor.blue*1.1;  // because the sensor is more sensitive to green
     greenness = detectedColor.green;
     
     SmartDashboard.putNumber("Rojo: ", redness);
@@ -185,10 +193,10 @@ posColor = "gray";
   }else{
     if(redness >= blueness){
       if(greenness >= redness){
-        if(greenness > 0.0){
-          posColor = "green";
-        }
-      }else{
+        if(greenness > 0.0){        // blue is all the way retracted
+          posColor = "green";       // green is shelf position
+        }                           // red is high position
+      }else{                        // gray means it's part-way through an extension/retraction
         posColor = "red";
       }
     }else{
@@ -210,7 +218,13 @@ posColor = "gray";
  posRestButton = joystickButtons.getRawButton(1);//Y-Yellow
  grabberButton = joystickButtons.getRawButton(4);//X-Blue
  releaseButton = joystickButtons.getRawButton(3);//B-Red
+ manualButton = joystickManual.getRawButton(11);//Switch Up
+ manualStick = joystickManual.getRawAxis(1);
+ manualFASlideButton = joystickManual.getRawButton(2);
+ manualExtensionButton = joystickManual.getRawButton(3);
+ manualPivotButton = joystickManual.getRawButton(4);
 
+ 
 SmartDashboard.updateValues();
 
  time++;
@@ -266,6 +280,8 @@ autoTime++;
   @Override
   public void teleopPeriodic() {
 
+
+
   // DRIVE CODE
   double leftStick = joystickDriver.getRawAxis(1);
   double rightStick = joystickDriver.getRawAxis(5);
@@ -300,7 +316,7 @@ if(rightStick > -0.05 && rightStick < 0.05){
   }
 
 
-  // Grabber Code
+  // Grabber Code - a pair of pneumatics cylanders actuated by a single solanoid
 
 if(grabberButton){
 grabber.set(kForward);
@@ -308,24 +324,37 @@ grabber.set(kForward);
   grabber.set(kReverse);
 }
 
-if(posRestButton){
-noTarget = true;
-highPosBypass = false;
-shelfPosBypass = false;
-goRest = true;
-goShelf = false;
-goHigh = false;
-goMid = false;
-goGround = false;
+
+  if(manualButton){
+  noTarget = false;
+  highPosBypass = false;
+  shelfPosBypass = false;
+  goRest = false;
+  goShelf = false;
+  goHigh = false;
+  goMid = false;
+  goGround = false;
+  goManual = true;
+}else if(posRestButton){
+  noTarget = true;
+  highPosBypass = false;
+  shelfPosBypass = false;
+  goRest = true;
+  goShelf = false;
+  goHigh = false;
+  goMid = false;
+  goGround = false;
+  goManual = false;
 }else if(posShelfButton){
   noTarget = false;
   highPosBypass = false;
- shelfPosBypass = false;
- goRest = false;
+  shelfPosBypass = false;
+  goRest = false;
   goShelf = true;
   goHigh = false;
   goMid = false;
   goGround = false;
+  goManual = false;
 }else if(posHighButton){
   noTarget = false;
   shelfPosBypass = false;
@@ -334,6 +363,7 @@ goGround = false;
   goHigh = true;
   goMid = false;
   goGround = false;
+  goManual = false;
 }else if(posMidButton){
   noTarget = false;
   highPosBypass = false;
@@ -343,8 +373,9 @@ goGround = false;
   goHigh = false;
   goMid = true;
   goGround = false;
+  goManual = false;
 }else if(posGroundButton){
-  noTarget = true;
+  noTarget = false;
   highPosBypass = false;
   shelfPosBypass = false;
   goRest = false;
@@ -352,6 +383,7 @@ goGround = false;
   goHigh = false;
   goMid = false;
   goGround = true;
+  goManual = false;
 }
 
 if(!goRest){
@@ -361,17 +393,43 @@ if(!goRest){
   restVar2 = 0;
 }
 
-if(goGround){
-  pivot.configClosedloopRamp(10.0);
-  System.out.println("YES");
+if(!manualPivotButton){
+  manualTT1 = true;
+}
+
+// Manual override can be used if the robot behaves unexpectedly, if any of the sensors/encoders
+// aren't working, or if the robot needs to do something beyond its usual functions.
+
+if(goManual){
+  if(manualExtensionButton){
+    armExtension.set(VictorSPXControlMode.PercentOutput, manualStick);
+    FASlide.set(0.0);
+  }else if(manualFASlideButton){
+    FASlide.set(manualStick);
+    armExtension.set(VictorSPXControlMode.PercentOutput, 0.0);
+  }else if(manualPivotButton){
+    if(manualTT1){
+     manualTT2 = manualTimer;
+     manualTT1 = false; 
+    }
+
+    manualTT3 = manualTimer - manualTT2;
+
+
+    target = target + manualTT3;
+    armExtension.set(VictorSPXControlMode.PercentOutput, 0.0);
+    FASlide.set(0.0);
   }else{
-    pivot.configClosedloopRamp(0.0);
-    System.out.println("NO");
+    armExtension.set(VictorSPXControlMode.PercentOutput, 0.0);
+    FASlide.set(0.0);
   }
+  manualTimer += 120;
+}
+
 
 if(goRest){
   if(posColor != "blue"){
-    armExtension.set(VictorSPXControlMode.PercentOutput, -0.5);
+    armExtension.set(VictorSPXControlMode.PercentOutput, -0.7);
       }else{
         armExtension.set(VictorSPXControlMode.PercentOutput, 0);
         if(FAEncoder.getPosition()>-0.5){
@@ -392,7 +450,7 @@ if(goRest){
 
 if(goShelf){
   if(posColor != "blue"&&!shelfPosBypass){
-    armExtension.set(VictorSPXControlMode.PercentOutput, -0.3);
+    armExtension.set(VictorSPXControlMode.PercentOutput, -0.7);
       }else{
         if(!shelfPosBypass){
         armExtension.set(VictorSPXControlMode.PercentOutput, 0);
@@ -404,7 +462,7 @@ if(goShelf){
           target =-12500.0;
           shelfPosBypass = true;
           if(posColor != "green"){
-            armExtension.set(VictorSPXControlMode.PercentOutput, 0.3);
+            armExtension.set(VictorSPXControlMode.PercentOutput, 0.4);
           }else{
             armExtension.set(VictorSPXControlMode.PercentOutput, 0.0);
           }
@@ -419,18 +477,12 @@ if(goShelf){
 
 if(goGround){System.out.println("Ground");
   if(posColor != "blue"){
-    armExtension.set(VictorSPXControlMode.PercentOutput, -0.5);
+    armExtension.set(VictorSPXControlMode.PercentOutput, -0.7);
       }else{
         armExtension.set(VictorSPXControlMode.PercentOutput, 0);
         if(FAEncoder.getPosition()>-0.5){
           FASlide.set(0.0);
-          if(joystickButtons.getRawAxis(1) == 0){
-          pivot.set(TalonFXControlMode.PercentOutput, -0.24);
-          }else if(joystickButtons.getRawAxis(1) > 0){
-            pivot.set(TalonFXControlMode.PercentOutput, -0.21);
-          }else  {
-            pivot.set(TalonFXControlMode.PercentOutput, -0.27);
-          }
+          target = -24000.0;
         }else{
           FASlide.set(0.25);
         }
@@ -440,7 +492,7 @@ if(goGround){System.out.println("Ground");
 
 if(goMid){
   if(posColor != "blue"){
-    armExtension.set(VictorSPXControlMode.PercentOutput, -0.3);
+    armExtension.set(VictorSPXControlMode.PercentOutput, -0.7);
     System.out.println("OOOOOOOOOOOOOOOOOOOOOOOO");
       }else{
         armExtension.set(VictorSPXControlMode.PercentOutput, 0);
@@ -455,12 +507,12 @@ if(goMid){
 
 if(goHigh){
   if(posColor != "blue"&&!highPosBypass){
-    armExtension.set(VictorSPXControlMode.PercentOutput, -0.3);
+    armExtension.set(VictorSPXControlMode.PercentOutput, -0.7);
       }else{
         if(!highPosBypass){
         armExtension.set(VictorSPXControlMode.PercentOutput, 0);
         }
-        target = -13000.0;
+        target = -12300.0;
         if(FAEncoder.getPosition()<-32.5){
           FASlide.set(0.0);
         }else{
@@ -468,7 +520,7 @@ if(goHigh){
         }
           highPosBypass = true;
           if(posColor != "red"){
-            armExtension.set(VictorSPXControlMode.PercentOutput, 0.3);
+            armExtension.set(VictorSPXControlMode.PercentOutput, 0.4);
           }else{
             armExtension.set(VictorSPXControlMode.PercentOutput, 0);
           }

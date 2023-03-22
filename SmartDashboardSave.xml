@@ -1,0 +1,39 @@
+<xml version="1.0">
+<dashboard>
+	<widget field="Arm Position" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.LinePlot">
+		<location x="648" y="102"/>
+	</widget>
+	<widget field="FalconPosition" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="0" y="88"/>
+	</widget>
+	<widget field="PID target" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.LinePlot">
+		<location x="244" y="102"/>
+	</widget>
+	<widget field="MotorPower" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="0" y="193"/>
+	</widget>
+	<widget field="FalconPosition (degrees)" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="21" y="21"/>
+	</widget>
+	<widget field="verde: " type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="0" y="172"/>
+	</widget>
+	<widget field="azul: " type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="0" y="151"/>
+	</widget>
+	<widget field="FASlide position" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="0" y="130"/>
+	</widget>
+	<widget field="Color: " type="String" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="0" y="109"/>
+	</widget>
+	<widget field="Auto choices" type="String Chooser" class="edu.wpi.first.smartdashboard.gui.elements.Chooser">
+		<location x="0" y="21"/>
+	</widget>
+	<widget field="Rojo: " type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="0" y="0"/>
+	</widget>
+</dashboard>
+<live-window>
+</live-window>
+</xml>
