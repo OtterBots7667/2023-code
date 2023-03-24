@@ -338,7 +338,7 @@ if(goHigh){
         if(!highPosBypass){
         armExtension.set(VictorSPXControlMode.PercentOutput, 0);
         }
-        target = -9000.0;
+        target = -10000.0;
         if(FAEncoder.getPosition()<-32.5){
           FASlide.set(0.0);
         }else{
@@ -688,67 +688,7 @@ teleopCounter++;
 
   /** This function is called periodically during test mode. */
   @Override
-  public void testPeriodic() {
-
-// if(joystickDriver.getRawButton(1)){
-  // pivot.set(TalonFXControlMode.PercentOutput, 0.12);
-// }else if(joystickDriver.getRawButton(2)){
-// }else{
-  // pivot.set(TalonFXControlMode.PercentOutput, 0);
-// }
-// if(joystickDriver.getRawButton(1)){
-// FASlide.set(0.25);
-// }else if(joystickDriver.getRawButton(4)){
-//   FASlide.set(-0.25);
-// }else{
-//   FASlide.set(0);
-// }
-
-// pivot.set(TalonFXControlMode.PercentOutput,joystickDriver.getRawAxis(1));
-
-// Color detectedColor = colorSensor.getColor();
-// SmartDashboard.putNumber("Rojo: ", detectedColor.red);
-
-// if(detectedColor.red>0.35){
-//   System.out.println("YES");
-// }else{
-//   System.out.println("NO");
-// }
-
-armExtension.set(VictorSPXControlMode.PercentOutput,joystickDriver.getRawAxis(5));
-
-// if(joystickDriver.getRawButton(1)){
-// grabber.set(DoubleSolenoid.Value.kReverse);
-// }else if(joystickDriver.getRawButton(4)){
-//   grabber.set(DoubleSolenoid.Value.kForward);
-// }else{
-//   grabber.set(DoubleSolenoid.Value.kOff);
-// }
-
-
-// if(joystickDriver.getRawButton(1)){
-//   grabber.set(kForward);
-//   }else if(joystickDriver.getRawButton(4)){
-//     grabber.set(kReverse);
-//   }
-
-
-// if(joystickDriver.getRawButton(1)){
-//   pivot.set(TalonFXControlMode.PercentOutput,-.2);
-// }else if(joystickDriver.getRawButton(4)){
-//   pivot.set(TalonFXControlMode.PercentOutput,.15);
-// }else{
-//   pivot.set(TalonFXControlMode.PercentOutput,0.05);
-// }
-
-// System.out.println(pivot.getSelectedSensorPosition()/228);
-
-// FASlide.set(joystickDriver.getRawAxis(5));
-
-// pivot.set(TalonFXControlMode.PercentOutput,.15);
-
-
-  }
+  public void testPeriodic() {}
 
   /** This function is called once when the robot is first started up. */
   @Override
@@ -760,9 +700,7 @@ armExtension.set(VictorSPXControlMode.PercentOutput,joystickDriver.getRawAxis(5)
 
   public void restPosChange(int thing1, Double thing2){
 
-
     if((thing1 + 5) == restCount){
-
 
       if((thing2 > pivot.getSelectedSensorPosition()-10) && (thing2 < pivot.getSelectedSensorPosition()+10)){
       
@@ -772,32 +710,4 @@ armExtension.set(VictorSPXControlMode.PercentOutput,joystickDriver.getRawAxis(5)
       }
     }
   }
-
-//   public void PID(int position) {
-//     double P = 0.035;
-//     double I = 0.002;
-//     double D = 0.005;
-  
-//     double count = pivot.getSelectedSensorPosition();
-  
-//     double error = -position - count;
-  
-//     integral = integral + (error * 0.02 * I);
-  
-//     double derivative = (error - previous_error) / .02;
-  
-//     double rcw = P * error + integral + D * derivative;
-  
-//     SmartDashboard.putNumber("MotorPower", rcw);
-//     SmartDashboard.putNumber("Error", error);
-  
-//     previous_error = error;
-// if((rcw/100)> .5){
-// rcw = 50;
-// }
-//     if (Math.abs(error) > 5) {
-//       pivot.set(TalonFXControlMode.PercentOutput, rcw / 100.0);
-//       System.out.println(rcw/100);
-//     }
-//   }
 }
