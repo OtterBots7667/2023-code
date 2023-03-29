@@ -119,6 +119,8 @@ Double redness = 0.0;
 Double blueness = 0.0;
 Double greenness = 0.0;
 String posColor = null;
+Boolean colorDisabled = false;
+
 Boolean auto = false;
 Boolean noTarget = true;
 Double manualTimer = 0.0;
@@ -198,13 +200,9 @@ pivot.set(TalonFXControlMode.PercentOutput, pid);
   target = 0.0;
 }
 
-
-// System.out.println(pid);
 SmartDashboard.putNumber("PID target", target);
 SmartDashboard.putNumber("PID_target", target);
 SmartDashboard.putNumber("Arm Position", armPos);
-
-
 
 
 
@@ -220,6 +218,11 @@ SmartDashboard.putNumber("Arm Position", armPos);
     SmartDashboard.putNumber("azul: ", blueness);
 
     SmartDashboard.putNumber("verde: ", greenness);
+
+if(blueness == 0.0){
+  colorDisabled = true;
+  System.out.println("COLOR SENSOR IS DISABLED");
+}
 
 if(redness<0.4 && blueness<0.35 && greenness<0.55){
 posColor = "gray";
@@ -244,18 +247,18 @@ posColor = "gray";
     SmartDashboard.putNumber("FalconPosition (degrees)", pivot.getSelectedSensorPosition()/228);
     SmartDashboard.putNumber("FalconPosition", pivot.getSelectedSensorPosition());
 
- posGroundButton = joystickButtons.getRawButton(8);//Low Yellow
- posMidButton = joystickButtons.getRawButton(7);//Low-Mid Yellow
- posHighButton = joystickButtons.getRawButton(6);//High-Mid Yellow
- posShelfButton = joystickButtons.getRawButton(5);//High Yellow
- posRestButton = joystickButtons.getRawButton(1);//Y-Yellow
- grabberButton = joystickButtons.getRawButton(4);//X-Blue
- releaseButton = joystickButtons.getRawButton(3);//B-Red
- manualButton = joystickManual.getRawButton(11);//Switch Up
- manualStick = joystickManual.getRawAxis(1);
- manualFASlideButton = joystickManual.getRawButton(2);
- manualExtensionButton = joystickManual.getRawButton(3);
- manualPivotButton = joystickManual.getRawButton(4);
+ posGroundButton = joystickButtons.getRawButton(1);//Low Yellow
+ posMidButton = joystickButtons.getRawButton(2);//Low-Mid Yellow
+ posHighButton = joystickButtons.getRawButton(3);//High-Mid Yellow
+ posShelfButton = joystickButtons.getRawButton(4);//High Yellow
+ posRestButton = joystickButtons.getRawButton(7);//Y-Yellow
+ grabberButton = joystickButtons.getRawButton(12);//X-Blue
+ releaseButton = joystickButtons.getRawButton(11);//B-Red
+//  manualButton = joystickManual.getRawButton(11);//Switch Up
+//  manualStick = joystickManual.getRawAxis(1);
+//  manualFASlideButton = joystickManual.getRawButton(2);
+//  manualExtensionButton = joystickManual.getRawButton(3);
+//  manualPivotButton = joystickManual.getRawButton(4);
 
 // SmartDashboard.updateValues();
 
@@ -274,26 +277,25 @@ posColor = "gray";
    */
   @Override
   public void autonomousInit() {
-    m_autoSelected = m_chooser.getSelected();
-    m_autoSelected = SmartDashboard.getString("Auto Selector", "awdbsKJ");
-    System.out.println("Auto selected: " + m_autoSelected);
+    // m_autoSelected = m_chooser.getSelected();
+    // m_autoSelected = SmartDashboard.getString("Auto Selector", "awdbsKJ");
+    // System.out.println("Auto selected: " + m_autoSelected);
 
-    auto = true;
+    // auto = true;
   }
 
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
 
-    if(autoTime1 < 420){
-//Go to high position
+    if(autoTime1 < 300){
+//Go to mid position
 noTarget = false;
-goHigh = true;
-    }else if(autoTime1 < 500){
+goMid = true;
+    }else if(autoTime1 < 350){
       grabber.set(kReverse);
-    }else if(autoTime1 <600){
-goHigh = false;
-highPosBypass = false;
+    }else if(autoTime1 <525){
+goMid = false;
 noTarget = true;
 goRest = true;
     }else{
@@ -331,31 +333,50 @@ if(goRest){
 }
 
 
-if(goHigh){
-  if(posColor != "blue"&&!highPosBypass){
+
+if(goMid){
+  if(posColor != "blue"){
     armExtension.set(VictorSPXControlMode.PercentOutput, -0.45);
       }else{
-        if(!highPosBypass){
         armExtension.set(VictorSPXControlMode.PercentOutput, 0);
-        }
-        target = -10000.0;
-        if(FAEncoder.getPosition()<-32.5){
-          FASlide.set(0.0);
-        }else{
-          FASlide.set(-0.25);
-        }
-          highPosBypass = true;
-          if(posColor != "red"){
-            armExtension.set(VictorSPXControlMode.PercentOutput, 0.3);
-            if(posColor == "green"){
-            }
-          }else{
-            armExtension.set(VictorSPXControlMode.PercentOutput, 0);
-          }
-        }
+           target = -8400.0;
+            if(FAEncoder.getPosition()<-32.5){
+              FASlide.set(0.0);
+            }else{
+              FASlide.set(-0.25);
+            } 
+      }
 }
 
+
+// if(goHigh){
+//   if(posColor != "blue"&&!highPosBypass){
+//     armExtension.set(VictorSPXControlMode.PercentOutput, -0.45);
+//       }else{
+//         if(!highPosBypass){
+//         armExtension.set(VictorSPXControlMode.PercentOutput, 0);
+//         }
+//         target = -10000.0;
+//         if(FAEncoder.getPosition()<-32.5){
+//           FASlide.set(0.0);
+//         }else{
+//           FASlide.set(-0.25);
+//         }
+//           highPosBypass = true;
+//           if(posColor != "red"){
+//             armExtension.set(VictorSPXControlMode.PercentOutput, 0.3);
+//             if(posColor == "green"){
+//             }
+//           }else{
+//             armExtension.set(VictorSPXControlMode.PercentOutput, 0);
+//           }
+//         }
+// }
+
 autoTime1++;
+
+
+
 
 //     switch (m_autoSelected) {
 //       case kCustomAuto:
@@ -444,7 +465,6 @@ grabber.set(kForward);
   grabber.set(kReverse);
 }
 
-
   if(manualButton){
   noTarget = false;
   highPosBypass = false;
@@ -529,7 +549,6 @@ if(goManual){
     armExtension.set(VictorSPXControlMode.PercentOutput, 0.0);
   }else if(manualPivotButton){
 
-
 if(manualStick > 0.5){
     manualTimer = 120.0;
 }else if(manualStick < -0.5){
@@ -548,9 +567,8 @@ manualTimer = -120.0;
   }
 }
 
-
 if(goRest){
-  if(posColor != "blue"){
+  if((posColor != "blue") && !colorDisabled){
     armExtension.set(VictorSPXControlMode.PercentOutput, -0.45);
       }else{
         armExtension.set(VictorSPXControlMode.PercentOutput, 0);
@@ -573,9 +591,8 @@ if(goRest){
       }
 }
 
-
-if(goShelf){
-  if(posColor != "blue"&&!shelfPosBypass){
+if(goShelf && !colorDisabled){
+  if(posColor != "blue" && !shelfPosBypass){
     armExtension.set(VictorSPXControlMode.PercentOutput, -0.45);
       }else{
         if(!shelfPosBypass){
@@ -587,7 +604,7 @@ if(goShelf){
           }
           target =-12500.0;
           shelfPosBypass = true;
-          if(posColor != "green"){
+          if(posColor != "green" && !colorDisabled){
             armExtension.set(VictorSPXControlMode.PercentOutput, 0.3);
           }else{
             armExtension.set(VictorSPXControlMode.PercentOutput, 0.0);
@@ -595,14 +612,12 @@ if(goShelf){
 
         }else{
           FASlide.set(0.25);
-
         }
       }
 }
 
-
-if(goGround){System.out.println("Ground");
-  if(posColor != "blue"){
+if(goGround){
+  if(posColor != "blue" && !colorDisabled){
     armExtension.set(VictorSPXControlMode.PercentOutput, -0.45);
       }else{
         armExtension.set(VictorSPXControlMode.PercentOutput, 0);
@@ -615,11 +630,9 @@ if(goGround){System.out.println("Ground");
       }
 }
 
-
 if(goMid){
-  if(posColor != "blue"){
+  if(posColor != "blue" && !colorDisabled){
     armExtension.set(VictorSPXControlMode.PercentOutput, -0.45);
-    System.out.println("OOOOOOOOOOOOOOOOOOOOOOOO");
       }else{
         armExtension.set(VictorSPXControlMode.PercentOutput, 0);
            target = -11400.0;
@@ -631,47 +644,46 @@ if(goMid){
       }
 }
 
-if(goHigh){
-  if(posColor != "blue"&&!highPosBypass){
-    armExtension.set(VictorSPXControlMode.PercentOutput, -0.45);
-      }else{
-        if(!highPosBypass){
-        armExtension.set(VictorSPXControlMode.PercentOutput, 0);
-        }
-        target = -9000.0;
-        if(FAEncoder.getPosition()<-32.5){
-          FASlide.set(0.0);
-        }else{
-          FASlide.set(-0.25);
-        }
-          highPosBypass = true;
-          if(posColor != "red"){
-            armExtension.set(VictorSPXControlMode.PercentOutput, 0.3);
-            if(posColor == "green"){
-            }
-          }else{
-            armExtension.set(VictorSPXControlMode.PercentOutput, 0);
-          }
-      }
-  //make sure arm is retracted
-  //make sure FASlide is all the way back
-  //set pivot angle
-  //extend
-  //set FASlide
-}
+// if(goHigh){
+//   if(posColor != "blue" && !highPosBypass){
+//     armExtension.set(VictorSPXControlMode.PercentOutput, -0.45);
+//       }else{
+//         if(!highPosBypass){
+//         armExtension.set(VictorSPXControlMode.PercentOutput, 0);
+//         }
+//         target = -9000.0;
+//         if(FAEncoder.getPosition()<-32.5){
+//           FASlide.set(0.0);
+//         }else{
+//           FASlide.set(-0.25);
+//         }
+//           highPosBypass = true;
+//           if(posColor != "red"){
+//             armExtension.set(VictorSPXControlMode.PercentOutput, 0.3);
+//             if(posColor == "green"){
+//             }
+//           }else{
+//             armExtension.set(VictorSPXControlMode.PercentOutput, 0);
+//           }
+//       }
+//   //make sure arm is retracted
+//   //make sure FASlide is all the way back
+//   //set pivot angle
+//   //extend
+//   //set FASlide
+// }
 
-if(joystickButtons.getRawButton(2) && joystickButtons.getRawAxis(1)<-0.5){
-brake.set(kForward);
-System.out.println("Brake Deployed");
-}else if(joystickButtons.getRawButton(2) && joystickButtons.getRawAxis(1)>0.5){
-  brake.set(kReverse);
-  System.out.println("Brake Retracted");
-}
+//Brake - helps prevent falling off the charge station
 
-
+// if(joystickButtons.getRawButton(2) && joystickButtons.getRawAxis(1)<-0.5){
+// brake.set(kForward);
+// System.out.println("Brake Deployed");
+// }else if(joystickButtons.getRawButton(2) && joystickButtons.getRawAxis(1)>0.5){
+//   brake.set(kReverse);
+//   System.out.println("Brake Retracted");
+// }
 
 teleopCounter++;
-
   }
 
   /** This function is called once when the robot is disabled. */
@@ -703,9 +715,7 @@ teleopCounter++;
     if((thing1 + 5) == restCount){
 
       if((thing2 > pivot.getSelectedSensorPosition()-10) && (thing2 < pivot.getSelectedSensorPosition()+10)){
-      
-        System.out.println("Falcon has been zeroed!");
-      
+            
         pivot.setSelectedSensorPosition(0.0);
       }
     }

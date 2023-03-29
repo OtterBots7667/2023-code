@@ -27,9 +27,6 @@
 	<widget field="Color: " type="String" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
 		<location x="0" y="109"/>
 	</widget>
-	<widget field="Auto choices" type="String Chooser" class="edu.wpi.first.smartdashboard.gui.elements.Chooser">
-		<location x="67" y="330"/>
-	</widget>
 	<widget field="Rojo: " type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
 		<location x="0" y="0"/>
 	</widget>
@@ -39,4 +36,5 @@
 </dashboard>
 <live-window>
 </live-window>
+	<hidden field="Auto choices"/>
 </xml>
